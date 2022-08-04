@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  fetcher:
+    build: ./fetcher
+    environment:
+      TZ: Asia/Tokyo
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./config.json
+        target: /app/config.json
+
+  api:
+    build: ./api
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - "8080:80"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./config.json
+        target: /app/config.json
+
+  mariadb:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: rootPassword
+      MYSQL_USER: mcbans-cache-server
+      MYSQL_PASSWORD: mcbans-cache-server
+      MYSQL_DATABASE: mcbans-cache-server
+      TZ: Asia/Tokyo
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootPassword",
+        ]
+      timeout: 20s
+      retries: 10
+    volumes:
+      - type: bind
+        source: ./db-data/
+        target: /var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: rootPassword
+      TZ: Asia/Tokyo
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - 8081:80
+    volumes:
+      - /sessions

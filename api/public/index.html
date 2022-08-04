@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mcbans-cache-server</title>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css"
+      integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+      .markdown-body {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="markdown-body">
+      <h1>tomacheese/mcbans-cache-server</h1>
+
+      <p>WebAPI that caches and distributes <a href="https://mcbans.com">MCBans</a> punishment information, player
+        information, and server information.</p>
+
+      <h2>End Points</h2>
+
+      <h3>Get Ban</h3>
+      <p>
+      <ul>
+        <li><code>GET /ban/{banId}</code></li>
+      </ul>
+      </p>
+      <p>Get a ban by banId.</p>
+
+      <h3>Get Player</h3>
+      <p>
+      <ul>
+        <li><code>GET /player/{playerId}</code></li>
+        <li><code>GET /player/{playerUUID}</code></li>
+      </ul>
+      </p>
+      <p>Get a player by playerId or playerUUID.<br>
+        UUID can be used either, whether there is hyphen.</p>
+
+      <h3>Get Server</h3>
+      <p>
+      <ul>
+        <li><code>GET /server/{serverId}</code></li>
+        <li><code>GET /server/{serverAddress}</code></li>
+      </ul>
+      </p>
+      <p>Get a server by serverId or serverAddress.</p>
+
+      <h3>Get Stats</h3>
+      <p>
+      <ul>
+        <li><code>GET /stats</code></li>
+      </ul>
+      </p>
+      <p>Get stats about the cache server.</p>
+
+      <h2>Rate limit</h2>
+      <p>
+        Requests are limited to 100 times per minute.<br>
+        When the rate limit is restricted, the relevant information is included in the response header
+        <code>Ratelimit-*</code>.
+      </p>
+
+      <h2>Disclaimer</h2>
+      <p>The developer is not responsible for any problems caused by the user using this project.</p>
+    </article>
+  </body>
+</html>
