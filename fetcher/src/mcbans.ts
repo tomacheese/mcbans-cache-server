@@ -462,6 +462,10 @@ export default class MCBans {
     page = 1
   ): Promise<number[]> {
     console.log(`getBanIds(${targetType}, ${target}, ${page})`)
+    if (page > 150) {
+      // memory leak prevention
+      return []
+    }
     const response = await this.$axios.get<string>(
       `https://www.mcbans.com/${targetType}/${target}/bans/page/${page}`
     )
