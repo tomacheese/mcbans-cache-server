@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { LessThan } from 'typeorm'
 import { DBBan } from './entities/ban.entity'
 import { DBPlayer } from './entities/player.entity'
@@ -359,5 +360,16 @@ async function main() {
 }
 
 ;(async () => {
-  await main()
+  await main().catch(async (err) => {
+    console.error(err)
+    await axios
+      .post('http://discord-deliver', {
+        embed: {
+          title: `Error`,
+          description: `${err.message}`,
+          color: 0xff0000,
+        },
+      })
+      .catch(() => null)
+  })
 })()
