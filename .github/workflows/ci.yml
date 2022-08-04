@@ -50,6 +50,6 @@ jobs:
         run: yarn compile
 
       - name: Run test 🏃‍♂️
+        if: ${{ matrix.directory == 'fetcher' }}
         working-directory: ${{ matrix.directory }}
-        if: ${{ matrix.directory }} == 'fetcher'
         run: yarn test
