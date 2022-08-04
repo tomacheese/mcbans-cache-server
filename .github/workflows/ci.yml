@@ -48,3 +48,8 @@ jobs:
       - name: Run compile 🏗️
         working-directory: ${{ matrix.directory }}
         run: yarn compile
+
+      - name: Run test 🏃‍♂️
+        working-directory: ${{ matrix.directory }}
+        if: ${{ matrix.directory }} == 'fetcher'
+        run: yarn test

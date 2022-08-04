@@ -36,7 +36,6 @@ describe('MCBans', () => {
     expect(ban.banType).toBe('global')
     expect(ban.player.id).toBe(39600394)
     expect(ban.player.name).toBe('gingermex')
-    expect(ban.repLost).toBe(2.3749999999999742)
     expect(ban.reputation).toBe(7.63)
     expect(ban.bannedBy.id).toBe(34608829)
     expect(ban.bannedBy.name).toBe('x9z')

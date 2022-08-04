@@ -25,7 +25,6 @@
   "devDependencies": {
     "@types/jest": "^28.1.6",
     "@types/node": "18.0.3",
-    "@types/yargs": "17.0.10",
     "@typescript-eslint/eslint-plugin": "5.31.0",
     "@typescript-eslint/parser": "5.31.0",
     "axios": "0.27.2",
@@ -46,7 +45,6 @@
     "typeorm": "^0.3.7",
     "typeorm-naming-strategies": "^4.1.0",
     "typescript": "4.7.4",
-    "yargs": "17.5.1",
     "yarn-run-all": "3.1.1"
   },
   "jest": {
