@@ -304,9 +304,8 @@ export default class MCBans {
       )
     }
     if (!playerSummary.uuid.text) {
-      throw new Error(
-        `Failed to get player ${target} (player uuid row not found)`
-      )
+      console.log(`Failed to get player ${target} (player uuid row not found)`)
+      return null
     }
     if (!playerSummary.bans.text) {
       throw new Error(
