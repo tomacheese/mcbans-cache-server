@@ -68,11 +68,9 @@ export class DBServer extends BaseEntity {
       serverId: this.serverId,
       address: this.address,
       reputation: this.reputation,
-      owner: this.owner ? pickProperties(this.owner.toJSON(), [
-        'playerId',
-        'name',
-        'uuid',
-      ]) : undefined,
+      owner: this.owner
+        ? pickProperties(this.owner.toJSON(), ['playerId', 'name', 'uuid'])
+        : undefined,
       bans: this.bans
         ? this.bans.map((ban) => omitProperty(ban.toJSON(), 'server'))
         : undefined,
