@@ -359,16 +359,20 @@ async function main() {
 }
 
 ;(async () => {
-  await main().catch(async (err) => {
-    console.error(err)
-    await axios
-      .post('http://discord-deliver', {
-        embed: {
-          title: `Error`,
-          description: `${err.message}`,
-          color: 0xff0000,
-        },
-      })
-      .catch(() => null)
-  })
+  await main()
+    .catch(async (err) => {
+      console.error(err)
+      await axios
+        .post('http://discord-deliver', {
+          embed: {
+            title: `Error`,
+            description: `${err.message}`,
+            color: 0xff0000,
+          },
+        })
+        .catch(() => null)
+    })
+    .finally(async () => {
+      await AppDataSource.destroy()
+    })
 })()
