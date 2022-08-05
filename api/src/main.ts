@@ -115,11 +115,7 @@ async function main() {
 }
 
 ;(async () => {
-  await main()
-    .catch(async (err) => {
-      console.error(err)
-    })
-    .finally(async () => {
-      await AppDataSource.destroy()
-    })
+  await main().catch(async (err) => {
+     console.error(err)
+   })
 })()
