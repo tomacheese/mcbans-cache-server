@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { LessThan } from 'typeorm'
+import BanQueue from './ban-queue'
 import { DBBan } from './entities/ban.entity'
 import { DBPlayer } from './entities/player.entity'
 import { DBServer } from './entities/server.entity'
@@ -18,12 +19,7 @@ async function getAllRecentBans(mcbans: MCBans): Promise<MCBansRecentBan[]> {
 
 // -------------------------------------------------------------------------- //
 
-const bansQueue: number[] = []
-const alreadyProcessedBans: number[] = []
-
-function addQueue(banIds: number[]) {
-  bansQueue.push(...banIds.filter((id) => !alreadyProcessedBans.includes(id)))
-}
+const banQueue = new BanQueue()
 
 async function getPlayer(
   mcbans: MCBans,
@@ -150,15 +146,14 @@ async function getServer(
 async function queueProcessor(mcbans: MCBans) {
   console.log('queueProcessor()')
   let cnt = 0
-  while (bansQueue.length > 0) {
+  while (banQueue.length() > 0) {
     cnt++
     // キューから取得
-    const banId = bansQueue.shift()
+    const banId = banQueue.shift()
     if (!banId) {
       continue
     }
-    alreadyProcessedBans.push(banId)
-    console.log(`Processing banId: ${banId} (${cnt}/${bansQueue.length})`)
+    console.log(`Processing banId: ${banId} (${cnt}/${banQueue.length()})`)
 
     const dbBan = await DBBan.findOne({
       where: {
@@ -211,7 +206,7 @@ async function queueProcessor(mcbans: MCBans) {
       console.log(
         `- Player|${player.name}: ${playerBanIds.length} bans add to queue.`
       )
-      addQueue(playerBanIds)
+      banQueue.addAll(playerBanIds)
     }
 
     // 処罰実施者情報を取得
@@ -238,7 +233,7 @@ async function queueProcessor(mcbans: MCBans) {
       console.log(
         `- Player|${player.name}: ${bannedByBanIds.length} bans add to queue.`
       )
-      addQueue(bannedByBanIds)
+      banQueue.addAll(bannedByBanIds)
     }
 
     // 処罰サーバ情報を取得
@@ -263,7 +258,7 @@ async function queueProcessor(mcbans: MCBans) {
       console.log(
         `- Server|${server.address}: ${serverBanIds.length} bans add to queue.`
       )
-      addQueue(serverBanIds)
+      banQueue.addAll(serverBanIds)
     }
 
     // 処罰情報をDBに保存
@@ -323,7 +318,7 @@ async function main() {
   // 最近の処罰情報から、処罰IDを取得しキューに追加
   console.log(`Fetching recent bans...`)
   const recentBans = await getAllRecentBans(mcbans)
-  bansQueue.push(...recentBans.map((ban) => ban.banId))
+  banQueue.addAll(recentBans.map((ban) => ban.banId))
   console.log(`- ${recentBans.length} bans added to queue.`)
 
   // キュー処理を実施
@@ -337,7 +332,7 @@ async function main() {
     },
   })
   console.log(`- ${dbBans.length} bans added to queue.`)
-  bansQueue.push(...dbBans.map((ban) => ban.banId))
+  banQueue.addAll(dbBans.map((ban) => ban.banId))
 
   // DBからサーバ情報を取得（最終確認日時から24時間以降のものを取得）
   console.log(`Fetching servers from DB...`)
@@ -352,7 +347,7 @@ async function main() {
     if (server === null) {
       throw new Error(`Server not found: ${dbServer.serverId}`)
     }
-    bansQueue.push(...server.banIds)
+    banQueue.addAll(server.banIds)
   }
 
   // キュー処理を実施
