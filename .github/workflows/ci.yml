@@ -52,4 +52,6 @@ jobs:
       - name: Run test 🏃‍♂️
         if: ${{ matrix.directory == 'fetcher' }}
         working-directory: ${{ matrix.directory }}
+        env:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
         run: yarn test
