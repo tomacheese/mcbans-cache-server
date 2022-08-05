@@ -289,6 +289,8 @@ async function queueProcessor(mcbans: MCBans) {
       await dbBan.save()
     }
   }
+
+  console.log('queueProcessor() ended')
 }
 
 /**
@@ -352,6 +354,8 @@ async function main() {
 
   // キュー処理を実施
   await queueProcessor(mcbans)
+
+  console.log('main() ended')
 }
 
 ;(async () => {
