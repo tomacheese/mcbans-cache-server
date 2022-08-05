@@ -12,6 +12,9 @@ services:
       - type: bind
         source: ./config.json
         target: /app/config.json
+      - type: bind
+        source: ./data
+        target: /data
 
   api:
     build: ./api
@@ -26,6 +29,9 @@ services:
       - type: bind
         source: ./config.json
         target: /app/config.json
+      - type: bind
+        source: ./data
+        target: /data
 
   mariadb:
     image: mariadb
