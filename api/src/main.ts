@@ -116,6 +116,6 @@ async function main() {
 
 ;(async () => {
   await main().catch(async (err) => {
-     console.error(err)
-   })
+    console.error(err)
+  })
 })()
