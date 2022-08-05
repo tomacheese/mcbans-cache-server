@@ -131,8 +131,8 @@ export default class MCBans {
       if (!serverMatch) {
         throw new Error(`Failed to parse server url ${serverUrl}`)
       }
-      const serverId = Number(serverMatch[1])
-      const serverAddress = serverMatch[2]
+      const serverId = Number(serverMatch[1].trim())
+      const serverAddress = serverMatch[2].trim()
       const bannedById = Number(
         bannedByUrl
           .split('/')
