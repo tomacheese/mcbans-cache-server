@@ -51,7 +51,7 @@ interface MCBansSummary {
 interface MCBansPlayer {
   playerId: number
   name: string
-  uuid: string
+  uuid: string | null
   reputation: number
   banIssued: number
   ownedServers: number[]
@@ -257,6 +257,7 @@ export default class MCBans {
     target: number | string,
     isSkipBanIds = false
   ): Promise<MCBansPlayer | null> {
+    console.log(`getPlayer(${target}, ${isSkipBanIds})`)
     const response = await this.$axios.get<string>(
       `https://www.mcbans.com/player/${target}/`,
       {
@@ -303,9 +304,9 @@ export default class MCBans {
         `Failed to get player ${target} (player reputation row not found)`
       )
     }
-    if (!playerSummary.uuid.text) {
-      console.log(`Failed to get player ${target} (player uuid row not found)`)
-      return null
+    let uuid = null
+    if (playerSummary.uuid.text) {
+      uuid = playerSummary.uuid.text
     }
     if (!playerSummary.bans.text) {
       throw new Error(
@@ -316,7 +317,6 @@ export default class MCBans {
       playerSummary.reputation.text.replace(' / 10', '')
     )
     const issuedBans = Number(playerSummary['issued bans'].text)
-    const uuid = playerSummary.uuid.text
     const banCount = Number(playerSummary.bans.text)
 
     const serversElement = $(

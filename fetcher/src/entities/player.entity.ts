@@ -31,7 +31,7 @@ export class DBPlayer extends BaseEntity {
     length: 32,
     comment: 'プレイヤーUUID',
   })
-  uuid!: string
+  uuid!: string | null
 
   @Column({
     type: 'double',
@@ -63,34 +63,4 @@ export class DBPlayer extends BaseEntity {
     comment: 'データ更新日時',
   })
   updatedAt!: Timestamp
-
-  toJSON() {
-    return {
-      playerId: this.playerId,
-      name: this.name,
-      uuid: this.uuid,
-      bans: this.bans.map((ban) => {
-        return {
-          banId: ban.banId,
-          type: ban.type,
-          server: {
-            id: ban.server.serverId,
-            address: ban.server.address,
-          },
-          bannedBy: {
-            id: ban.bannedBy.playerId,
-            name: ban.bannedBy.name,
-            uuid: ban.bannedBy.uuid,
-          },
-          reason: ban.reason,
-          bannedAt: ban.bannedAt,
-          lastCheckedAt: ban.lastCheckedAt,
-        }
-      }),
-      issuedBanIds: this.issuedBans.map((ban) => ban.banId),
-      ownedServerIds: this.ownedServers.map((server) => server.serverId),
-      reputation: this.reputation,
-      lastCheckedAt: this.lastCheckedAt,
-    }
-  }
 }

@@ -4,7 +4,7 @@ import ApiServerResponse from './ApiServerResponse'
 export default interface ApiPlayerResponse {
   playerId: number
   name: string
-  uuid: string
+  uuid: string | null
   reputation: number
   bans?: Omit<ApiBanResponse, 'player'>[]
   issuedBans?: Omit<ApiBanResponse, 'bannedBy'>[]

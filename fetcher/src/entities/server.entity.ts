@@ -60,15 +60,4 @@ export class DBServer extends BaseEntity {
     comment: 'データ更新日時',
   })
   updatedAt!: Timestamp
-
-  toJSON() {
-    return {
-      serverId: this.serverId,
-      address: this.address,
-      owner: this.owner,
-      bans: this.bans,
-      registeredAt: this.registeredAt,
-      lastCheckedAt: this.lastCheckedAt,
-    }
-  }
 }

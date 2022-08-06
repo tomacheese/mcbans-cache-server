@@ -63,27 +63,4 @@ export class DBBan extends BaseEntity {
     comment: 'データ更新日時',
   })
   updatedAt!: Timestamp
-
-  toJSON() {
-    return {
-      banId: this.banId,
-      player: {
-        id: this.player.playerId,
-        name: this.player.name,
-        uuid: this.player.uuid,
-      },
-      server: {
-        id: this.server.serverId,
-        address: this.server.address,
-      },
-      bannedBy: {
-        id: this.bannedBy.playerId,
-        name: this.bannedBy.name,
-        uuid: this.bannedBy.uuid,
-      },
-      reason: this.reason,
-      bannedAt: this.bannedAt,
-      lastCheckedAt: this.lastCheckedAt,
-    }
-  }
 }

@@ -33,7 +33,7 @@ export class DBPlayer extends BaseEntity {
     length: 32,
     comment: 'プレイヤーUUID',
   })
-  uuid!: string
+  uuid!: string | null
 
   @Column({
     type: 'double',
