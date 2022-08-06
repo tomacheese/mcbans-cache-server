@@ -30,6 +30,7 @@ export class DBPlayer extends BaseEntity {
     type: 'varchar',
     length: 32,
     comment: 'プレイヤーUUID',
+    nullable: true,
   })
   uuid!: string | null
 
