@@ -155,138 +155,143 @@ async function queueProcessor(mcbans: MCBans) {
     }
     console.log(`Processing banId: ${banId} (${cnt}/${banQueue.length()})`)
 
-    const dbBan = await DBBan.findOne({
-      where: {
-        banId,
-      },
-    })
-    // 最終確認日時が24時間以内であればスキップ
-    if (
-      dbBan &&
-      dbBan.lastCheckedAt &&
-      dbBan.lastCheckedAt.getTime() > Date.now() - 24 * 60 * 60 * 1000
-    ) {
-      console.log(`- The final confirmation time is within 24 hours, Skip.`)
-      continue
-    }
-
-    // 処罰情報を取得
-    const ban = await mcbans.getBan(banId)
-    if (ban === null) {
-      // 処罰情報がNULL = 処罰が解除された？
-      console.log(`- Ban is null, Remove.`)
-      if (dbBan) dbBan.remove()
-      continue
-    }
-
-    console.log(`Player: ${ban.player.name}`)
-    console.log(`Banned by: ${ban.bannedBy.name}`)
-    console.log(`Server: ${ban.server.address}`)
-
-    // 被処罰者情報を取得
-    const {
-      row: dbPlayer,
-      created: isPlayerCreated,
-      updated: isPlayerUpdated,
-    } = await getPlayer(mcbans, ban.player.id)
-    if (
-      isPlayerCreated ||
-      isPlayerUpdated ||
-      !dbPlayer ||
-      !dbPlayer.lastCheckedAt ||
-      dbPlayer.lastCheckedAt.getTime() < Date.now() - 24 * 60 * 60 * 1000
-    ) {
-      console.log("Get player's ban history from MCBans.")
-      const player = await mcbans.getPlayer(ban.player.id)
-      if (player === null) {
-        throw new Error(`Player not found: ${ban.player.id}`)
-      }
-
-      const playerBanIds = player.banIds
-      console.log(
-        `- Player|${player.name}: ${playerBanIds.length} bans add to queue.`
-      )
-      banQueue.addAll(playerBanIds)
-    }
-
-    // 処罰実施者情報を取得
-    const {
-      row: dbBannedByPlayer,
-      created: isBannedByCreated,
-      updated: isBannedByUpdated,
-    } = await getPlayer(mcbans, ban.bannedBy.id)
-    if (
-      isBannedByCreated ||
-      isBannedByUpdated ||
-      !dbBannedByPlayer ||
-      !dbBannedByPlayer.lastCheckedAt ||
-      dbBannedByPlayer.lastCheckedAt.getTime() <
-        Date.now() - 24 * 60 * 60 * 1000
-    ) {
-      console.log("Get banned-by player's ban history from MCBans.")
-      const player = await mcbans.getPlayer(ban.bannedBy.id)
-      if (player === null) {
-        throw new Error(`Player not found: ${ban.bannedBy.id}`)
-      }
-
-      const bannedByBanIds = player.banIds
-      console.log(
-        `- Player|${player.name}: ${bannedByBanIds.length} bans add to queue.`
-      )
-      banQueue.addAll(bannedByBanIds)
-    }
-
-    // 処罰サーバ情報を取得
-    const {
-      row: dbServer,
-      created: isServerCreated,
-      updated: isServerUpdated,
-    } = await getServer(mcbans, ban.server.id)
-    if (
-      isServerCreated ||
-      isServerUpdated ||
-      !dbServer ||
-      !dbServer.lastCheckedAt ||
-      dbServer.lastCheckedAt.getTime() < Date.now() - 24 * 60 * 60 * 1000
-    ) {
-      console.log("Get server's ban history from MCBans.")
-      const server = await mcbans.getServer(ban.server.id)
-      if (server === null) {
-        throw new Error(`Server not found: ${ban.server.id}`)
-      }
-      const serverBanIds = server.banIds
-      console.log(
-        `- Server|${server.address}: ${serverBanIds.length} bans add to queue.`
-      )
-      banQueue.addAll(serverBanIds)
-    }
-
-    // 処罰情報をDBに保存
-    if (dbBan) {
-      // 更新
-      console.log(`- Update data.`)
-      dbBan.type = ban.banType
-      dbBan.player = dbPlayer
-      dbBan.server = dbServer
-      dbBan.bannedBy = dbBannedByPlayer
-      dbBan.reason = ban.reason
-      dbBan.bannedAt = ban.bannedAt
-      dbBan.lastCheckedAt = new Date()
-      await dbBan.save()
-    } else {
-      // 新規
-      console.log(`- Create data.`)
-      const dbBan = DBBan.create({
-        banId,
-        type: ban.banType,
-        player: dbPlayer,
-        server: dbServer,
-        bannedBy: dbBannedByPlayer,
-        reason: ban.reason,
-        bannedAt: ban.bannedAt,
-        lastCheckedAt: new Date(),
+    try {
+      const dbBan = await DBBan.findOne({
+        where: {
+          banId,
+        },
       })
-      await dbBan.save()
+      // 最終確認日時が24時間以内であればスキップ
+      if (
+        dbBan &&
+        dbBan.lastCheckedAt &&
+        dbBan.lastCheckedAt.getTime() > Date.now() - 24 * 60 * 60 * 1000
+      ) {
+        console.log(`- The final confirmation time is within 24 hours, Skip.`)
+        continue
+      }
+
+      // 処罰情報を取得
+      const ban = await mcbans.getBan(banId)
+      if (ban === null) {
+        // 処罰情報がNULL = 処罰が解除された？
+        console.log(`- Ban is null, Remove.`)
+        if (dbBan) dbBan.remove()
+        continue
+      }
+
+      console.log(`Player: ${ban.player.name}`)
+      console.log(`Banned by: ${ban.bannedBy.name}`)
+      console.log(`Server: ${ban.server.address}`)
+
+      // 被処罰者情報を取得
+      const {
+        row: dbPlayer,
+        created: isPlayerCreated,
+        updated: isPlayerUpdated,
+      } = await getPlayer(mcbans, ban.player.id)
+      if (
+        isPlayerCreated ||
+        isPlayerUpdated ||
+        !dbPlayer ||
+        !dbPlayer.lastCheckedAt ||
+        dbPlayer.lastCheckedAt.getTime() < Date.now() - 24 * 60 * 60 * 1000
+      ) {
+        console.log("Get player's ban history from MCBans.")
+        const player = await mcbans.getPlayer(ban.player.id)
+        if (player === null) {
+          throw new Error(`Player not found: ${ban.player.id}`)
+        }
+
+        const playerBanIds = player.banIds
+        console.log(
+          `- Player|${player.name}: ${playerBanIds.length} bans add to queue.`
+        )
+        banQueue.addAll(playerBanIds)
+      }
+
+      // 処罰実施者情報を取得
+      const {
+        row: dbBannedByPlayer,
+        created: isBannedByCreated,
+        updated: isBannedByUpdated,
+      } = await getPlayer(mcbans, ban.bannedBy.id)
+      if (
+        isBannedByCreated ||
+        isBannedByUpdated ||
+        !dbBannedByPlayer ||
+        !dbBannedByPlayer.lastCheckedAt ||
+        dbBannedByPlayer.lastCheckedAt.getTime() <
+          Date.now() - 24 * 60 * 60 * 1000
+      ) {
+        console.log("Get banned-by player's ban history from MCBans.")
+        const player = await mcbans.getPlayer(ban.bannedBy.id)
+        if (player === null) {
+          throw new Error(`Player not found: ${ban.bannedBy.id}`)
+        }
+
+        const bannedByBanIds = player.banIds
+        console.log(
+          `- Player|${player.name}: ${bannedByBanIds.length} bans add to queue.`
+        )
+        banQueue.addAll(bannedByBanIds)
+      }
+
+      // 処罰サーバ情報を取得
+      const {
+        row: dbServer,
+        created: isServerCreated,
+        updated: isServerUpdated,
+      } = await getServer(mcbans, ban.server.id)
+      if (
+        isServerCreated ||
+        isServerUpdated ||
+        !dbServer ||
+        !dbServer.lastCheckedAt ||
+        dbServer.lastCheckedAt.getTime() < Date.now() - 24 * 60 * 60 * 1000
+      ) {
+        console.log("Get server's ban history from MCBans.")
+        const server = await mcbans.getServer(ban.server.id)
+        if (server === null) {
+          throw new Error(`Server not found: ${ban.server.id}`)
+        }
+        const serverBanIds = server.banIds
+        console.log(
+          `- Server|${server.address}: ${serverBanIds.length} bans add to queue.`
+        )
+        banQueue.addAll(serverBanIds)
+      }
+
+      // 処罰情報をDBに保存
+      if (dbBan) {
+        // 更新
+        console.log(`- Update data.`)
+        dbBan.type = ban.banType
+        dbBan.player = dbPlayer
+        dbBan.server = dbServer
+        dbBan.bannedBy = dbBannedByPlayer
+        dbBan.reason = ban.reason
+        dbBan.bannedAt = ban.bannedAt
+        dbBan.lastCheckedAt = new Date()
+        await dbBan.save()
+      } else {
+        // 新規
+        console.log(`- Create data.`)
+        const dbBan = DBBan.create({
+          banId,
+          type: ban.banType,
+          player: dbPlayer,
+          server: dbServer,
+          bannedBy: dbBannedByPlayer,
+          reason: ban.reason,
+          bannedAt: ban.bannedAt,
+          lastCheckedAt: new Date(),
+        })
+        await dbBan.save()
+      }
+    } catch (e) {
+      console.error(`Failed to process banId: ${banId}, skip.`)
+      console.error(e)
     }
   }
 
