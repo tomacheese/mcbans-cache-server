@@ -126,7 +126,8 @@ export default class MCBans {
         .split('/')
         .filter((s) => s.trim().length !== 0)
         .pop() as string
-      const serverRegex = /^https:\/\/www\.mcbans\.com\/server\/(\d+)\/(\S+)\/$/
+      const serverRegex =
+        /^https:\/\/www\.mcbans\.com\/server\/(\d+)\/([\S ]+)\/$/
       const serverMatch = serverUrl.match(serverRegex)
       if (!serverMatch) {
         throw new Error(`Failed to parse server url ${serverUrl}`)
