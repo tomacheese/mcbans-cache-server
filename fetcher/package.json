@@ -23,7 +23,7 @@
     "fix:prettier": "prettier --write src"
   },
   "devDependencies": {
-    "@types/jest": "29.1.2",
+    "@types/jest": "29.2.0",
     "@types/node": "18.0.3",
     "@typescript-eslint/eslint-plugin": "5.40.0",
     "@typescript-eslint/parser": "5.40.0",
