@@ -471,7 +471,12 @@ export default class MCBans {
       `https://www.mcbans.com/${targetType}/${target}/bans/page/${page}`
     )
     if (response.status !== 200) {
-      throw new Error(`Failed to get player ${target}`)
+      throw new Error(`Failed to get ban ids ${targetType}:${target}`)
+    }
+    if (response.data.length === 0) {
+      throw new Error(
+        `Failed to get ban ids ${targetType}:${target} (empty response)`
+      )
     }
     const $ = load(response.data)
     const table = $('div.dataTables_wrapper > table')
