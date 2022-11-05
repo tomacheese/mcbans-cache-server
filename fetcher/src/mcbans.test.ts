@@ -1,6 +1,6 @@
 import MCBans from './mcbans'
 
-jest.setTimeout(60000) // 60sec
+jest.setTimeout(120000) // 120sec
 
 describe('MCBans', () => {
   test('getRecentBans', async () => {
