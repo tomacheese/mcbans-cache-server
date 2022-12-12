@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import { Cheerio, CheerioAPI, Element, load } from 'cheerio'
 
 export interface MCBansRecentBan {
@@ -73,6 +73,7 @@ interface MCBansServer {
 
 export default class MCBans {
   $axios: AxiosInstance
+  private response: AxiosResponse<string> | null = null
 
   constructor() {
     this.$axios = axios.create({
@@ -83,13 +84,13 @@ export default class MCBans {
 
   async getRecentBans(page = 1): Promise<MCBansRecentBan[]> {
     console.log(`MCBans.getRecentBans(${page})`)
-    const response = await this.$axios.get<string>(
+    this.response = await this.$axios.get<string>(
       `https://www.mcbans.com/${page}`
     )
-    if (response.status !== 200) {
+    if (this.response.status !== 200) {
       throw new Error(`Failed to get recent bans page ${page}`)
     }
-    const $ = load(response.data)
+    const $ = load(this.response.data)
     const table = $('div.dataTables_wrapper > table')
     const rows = table.find('tbody > tr')
     const ret = []
@@ -165,19 +166,19 @@ export default class MCBans {
   }
 
   async getBan(banId: number): Promise<MCBansBan | null> {
-    const response = await this.$axios.get<string>(
+    this.response = await this.$axios.get<string>(
       `https://www.mcbans.com/ban/${banId}`,
       {
         maxRedirects: 0,
       }
     )
-    if (response.status === 302) {
+    if (this.response.status === 302) {
       return null
     }
-    if (response.status !== 200) {
+    if (this.response.status !== 200) {
       throw new Error(`Failed to get ban ${banId}`)
     }
-    const $ = load(response.data)
+    const $ = load(this.response.data)
 
     const summaryElements = $(
       '#content .box-holder-one-third > div.box-element:nth-child(1) > div.box-content'
@@ -259,19 +260,19 @@ export default class MCBans {
     isSkipBanIds = false
   ): Promise<MCBansPlayer | null> {
     console.log(`getPlayer(${target}, ${isSkipBanIds})`)
-    const response = await this.$axios.get<string>(
+    this.response = await this.$axios.get<string>(
       `https://www.mcbans.com/player/${target}/`,
       {
         maxRedirects: 0,
       }
     )
-    if (response.status === 302) {
+    if (this.response.status === 302) {
       return null
     }
-    if (response.status !== 200) {
+    if (this.response.status !== 200) {
       throw new Error(`Failed to get player ${target}`)
     }
-    const $ = load(response.data)
+    const $ = load(this.response.data)
 
     const playerElement = $('div#left-menu li.active a').attr('href')
     if (!playerElement) {
@@ -367,19 +368,19 @@ export default class MCBans {
     target: number | string,
     isSkipBanIds = false
   ): Promise<MCBansServer | null> {
-    const response = await this.$axios.get<string>(
+    this.response = await this.$axios.get<string>(
       `https://www.mcbans.com/server/${target}/`,
       {
         maxRedirects: 0,
       }
     )
-    if (response.status === 302) {
+    if (this.response.status === 302) {
       return null
     }
-    if (response.status !== 200) {
+    if (this.response.status !== 200) {
       throw new Error(`Failed to get server ${target}`)
     }
-    const $ = load(response.data)
+    const $ = load(this.response.data)
 
     const serverUrl = $('div#left-menu li.active a').attr('href')
     if (!serverUrl) {
@@ -467,18 +468,18 @@ export default class MCBans {
       // memory leak prevention
       return []
     }
-    const response = await this.$axios.get<string>(
+    this.response = await this.$axios.get<string>(
       `https://www.mcbans.com/${targetType}/${target}/bans/page/${page}`
     )
-    if (response.status !== 200) {
+    if (this.response.status !== 200) {
       throw new Error(`Failed to get ban ids ${targetType}:${target}`)
     }
-    if (response.data.length === 0) {
+    if (this.response.data.length === 0) {
       throw new Error(
         `Failed to get ban ids ${targetType}:${target} (empty response)`
       )
     }
-    const $ = load(response.data)
+    const $ = load(this.response.data)
     const table = $('div.dataTables_wrapper > table')
     const rows = table.find('tbody > tr')
     if (rows.length === 0) {
@@ -524,5 +525,9 @@ export default class MCBans {
       }
     }
     return summarys
+  }
+
+  public getLastResponse(): AxiosResponse<string> | null {
+    return this.response
   }
 }
