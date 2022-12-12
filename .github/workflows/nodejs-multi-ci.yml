@@ -112,3 +112,17 @@ jobs:
         with:
           name: ${{ matrix.directory }}-dist
           path: ${{ matrix.directory }}/dist
+
+      - name: Check exists responses directory
+        id: check-responses
+        if: success()
+        working-directory: ${{ matrix.directory }}
+        run: |
+          echo "exists=$(test -d responses && echo true || echo false)" >> $GITHUB_OUTPUT
+
+      - name: 📦 Upload responses artifact
+        if: ${{ success() && steps.check-responses.outputs.exists == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.directory }}-responses
+          path: ${{ matrix.directory }}/responses

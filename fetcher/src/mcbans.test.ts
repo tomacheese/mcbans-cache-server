@@ -1,11 +1,33 @@
 import MCBans from './mcbans'
+import fs from 'fs'
 
 jest.setTimeout(120000) // 120sec
 
 describe('MCBans', () => {
+  beforeAll(() => {
+    if (!fs.existsSync('responses')) {
+      fs.mkdirSync('responses')
+    }
+  })
+
   test('getRecentBans', async () => {
     const mcbans = new MCBans()
-    const recentBans = await mcbans.getRecentBans(1)
+    const filename = 'getRecentBans-1'
+    const recentBans = await mcbans
+      .getRecentBans(1)
+      .catch((err) => {
+        fs.writeFileSync(
+          `responses/${filename}.json`,
+          JSON.stringify(err, null, 2)
+        )
+        throw err
+      })
+      .finally(() => {
+        fs.writeFileSync(
+          `responses/${filename}.html`,
+          mcbans.getLastResponse()?.data || ''
+        )
+      })
     expect(recentBans).toHaveLength(30)
 
     const ban = recentBans[0]
@@ -27,7 +49,22 @@ describe('MCBans', () => {
 
   test('getBan', async () => {
     const mcbans = new MCBans()
-    const ban = await mcbans.getBan(5625028)
+    const filename = 'getBan-5625028'
+    const ban = await mcbans
+      .getBan(5625028)
+      .catch((err) => {
+        fs.writeFileSync(
+          `responses/${filename}.json`,
+          JSON.stringify(err, null, 2)
+        )
+        throw err
+      })
+      .finally(() => {
+        fs.writeFileSync(
+          `responses/${filename}.html`,
+          mcbans.getLastResponse()?.data || ''
+        )
+      })
     expect(ban).not.toBeNull()
     if (!ban) {
       return
@@ -49,7 +86,22 @@ describe('MCBans', () => {
 
   test('getPlayer (x4z/UUID)', async () => {
     const mcbans = new MCBans()
-    const player = await mcbans.getPlayer('5799296ad1ec425293bd440bb9caa65c')
+    const filename = 'getPlayer-x4z-UUID'
+    const player = await mcbans
+      .getPlayer('5799296ad1ec425293bd440bb9caa65c')
+      .catch((err) => {
+        fs.writeFileSync(
+          `responses/${filename}.json`,
+          JSON.stringify(err, null, 2)
+        )
+        throw err
+      })
+      .finally(() => {
+        fs.writeFileSync(
+          `responses/${filename}.html`,
+          mcbans.getLastResponse()?.data || ''
+        )
+      })
     expect(player).not.toBeNull()
     if (!player) {
       return
@@ -66,7 +118,22 @@ describe('MCBans', () => {
   test('getPlayer (gingermex/ID)', async () => {
     // 39600394
     const mcbans = new MCBans()
-    const player = await mcbans.getPlayer(39600394)
+    const filename = 'getPlayer-gingermex-ID'
+    const player = await mcbans
+      .getPlayer(39600394)
+      .catch((err) => {
+        fs.writeFileSync(
+          `responses/${filename}.json`,
+          JSON.stringify(err, null, 2)
+        )
+        throw err
+      })
+      .finally(() => {
+        fs.writeFileSync(
+          `responses/${filename}.html`,
+          mcbans.getLastResponse()?.data || ''
+        )
+      })
     expect(player).not.toBeNull()
     if (!player) {
       return
@@ -82,7 +149,22 @@ describe('MCBans', () => {
 
   test('getServer', async () => {
     const mcbans = new MCBans()
-    const server = await mcbans.getServer(57007)
+    const filename = 'getServer-57007'
+    const server = await mcbans
+      .getServer(57007)
+      .catch((err) => {
+        fs.writeFileSync(
+          `responses/${filename}.json`,
+          JSON.stringify(err, null, 2)
+        )
+        throw err
+      })
+      .finally(() => {
+        fs.writeFileSync(
+          `responses/${filename}.html`,
+          mcbans.getLastResponse()?.data || ''
+        )
+      })
     expect(server).not.toBeNull()
     if (!server) {
       return
