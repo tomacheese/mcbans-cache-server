@@ -9,7 +9,8 @@ WORKDIR /app
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install && \
+RUN echo network-timeout 600000 > .yarnrc && \
+  yarn install && \
   yarn cache clean
 
 COPY entrypoint.sh .
