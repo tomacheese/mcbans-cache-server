@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosProxyConfig, AxiosResponse } from 'axios'
 import { Cheerio, CheerioAPI, Element, load } from 'cheerio'
 
 export interface MCBansRecentBan {
@@ -79,7 +79,29 @@ export default class MCBans {
     this.$axios = axios.create({
       baseURL: 'https://www.mcbans.com/',
       validateStatus: () => true,
+      proxy: this.parseHttpProxy(),
     })
+  }
+
+  parseHttpProxy(): AxiosProxyConfig | false {
+    const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY
+    if (!proxy) return false
+
+    const parsed = new URL(proxy)
+    if (!parsed.hostname || !parsed.port) return false
+
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port),
+      auth:
+        parsed.username && parsed.password
+          ? {
+              username: parsed.username,
+              password: parsed.password,
+            }
+          : undefined,
+      protocol: parsed.protocol.replace(':', ''),
+    }
   }
 
   async getRecentBans(page = 1): Promise<MCBansRecentBan[]> {
