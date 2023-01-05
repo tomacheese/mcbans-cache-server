@@ -1,5 +1,9 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosProxyConfig, AxiosResponse } from 'axios'
 import { Cheerio, CheerioAPI, Element, load } from 'cheerio'
+
+export interface MCBansOptions {
+  proxy?: AxiosProxyConfig | false
+}
 
 export interface MCBansRecentBan {
   banType: string
@@ -75,10 +79,11 @@ export default class MCBans {
   $axios: AxiosInstance
   private response: AxiosResponse<string> | null = null
 
-  constructor() {
+  constructor(options: MCBansOptions) {
     this.$axios = axios.create({
       baseURL: 'https://www.mcbans.com/',
       validateStatus: () => true,
+      proxy: options.proxy || false,
     })
   }
 

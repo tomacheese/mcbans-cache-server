@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosProxyConfig } from 'axios'
 import { LessThan } from 'typeorm'
 import BanQueue from './ban-queue'
 import { DBBan } from './entities/ban.entity'
@@ -298,6 +298,27 @@ async function queueProcessor(mcbans: MCBans) {
   console.log('queueProcessor() ended')
 }
 
+function parseHttpProxy(): AxiosProxyConfig | false {
+  const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY
+  if (!proxy) return false
+
+  const parsed = new URL(proxy)
+  if (!parsed.hostname || !parsed.port) return false
+
+  return {
+    host: parsed.hostname,
+    port: parseInt(parsed.port),
+    auth:
+      parsed.username && parsed.password
+        ? {
+            username: parsed.username,
+            password: parsed.password,
+          }
+        : undefined,
+    protocol: parsed.protocol.replace(':', ''),
+  }
+}
+
 /**
  * メイン関数
  *
@@ -320,7 +341,9 @@ async function main() {
   await AppDataSource.initialize()
   console.log('Database initialized')
 
-  const mcbans = new MCBans()
+  const mcbans = new MCBans({
+    proxy: parseHttpProxy(),
+  })
 
   // 最近の処罰情報から、処罰IDを取得しキューに追加
   console.log(`Fetching recent bans...`)
