@@ -483,7 +483,8 @@ export default class MCBans {
   private async getBanIds(
     targetType: 'player' | 'server',
     target: number | string,
-    page = 1
+    page = 1,
+    retry = false
   ): Promise<number[]> {
     console.log(`getBanIds(${targetType}, ${target}, ${page})`)
     if (page > 150) {
@@ -494,9 +495,15 @@ export default class MCBans {
       `https://www.mcbans.com/${targetType}/${target}/bans/page/${page}`
     )
     if (this.response.status !== 200) {
+      if (!retry) {
+        return await this.getBanIds(targetType, target, page, true)
+      }
       throw new Error(`Failed to get ban ids ${targetType}:${target}`)
     }
     if (this.response.data.length === 0) {
+      if (!retry) {
+        return await this.getBanIds(targetType, target, page, true)
+      }
       throw new Error(
         `Failed to get ban ids ${targetType}:${target} (empty response)`
       )
