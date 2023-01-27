@@ -1,15 +1,15 @@
 {
   "folders": [
     {
-      "name": "mcbans-cache-server",
-      "path": "."
-    },
-    {
       "name": "fetcher",
       "path": "fetcher"
     },
     {
       "path": "api"
+    },
+    {
+      "name": "mcbans-cache-server",
+      "path": "."
     }
   ],
 }
