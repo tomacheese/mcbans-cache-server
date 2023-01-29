@@ -1,5 +1,6 @@
 import cors from 'cors'
 import express, { json as expressJson } from 'express'
+import fs from 'fs'
 import { rateLimit } from 'express-rate-limit'
 import { FindOptionsWhere } from 'typeorm'
 import { DBBan } from './entities/ban.entity'
@@ -31,10 +32,17 @@ async function main() {
     const dbBans = await DBBan.count()
     const dbPlayers = await DBPlayer.count()
     const dbServers = await DBServer.count()
+
+    let queueCount = null
+    if (fs.existsSync('/data/bans-queue.json')) {
+      const queue = JSON.parse(fs.readFileSync('/data/bans-queue.json', 'utf8'))
+      queueCount = queue.length
+    }
     res.json({
       bans: dbBans,
       players: dbPlayers,
       servers: dbServers,
+      queues: queueCount,
     })
   })
 
