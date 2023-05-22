@@ -48,7 +48,7 @@ interface MCBansSummary {
   }
 }
 
-interface MCBansPlayer {
+export interface MCBansPlayer {
   playerId: number
   name: string
   uuid: string | null
@@ -58,7 +58,7 @@ interface MCBansPlayer {
   banIds: number[]
 }
 
-interface MCBansServer {
+export interface MCBansServer {
   serverId: number
   address: string
   owner: {
