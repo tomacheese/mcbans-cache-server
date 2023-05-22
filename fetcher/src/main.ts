@@ -4,7 +4,7 @@ import BanQueue from './ban-queue'
 import { DBBan } from './entities/ban.entity'
 import { DBPlayer } from './entities/player.entity'
 import { DBServer } from './entities/server.entity'
-import MCBans, { MCBansRecentBan } from './mcbans'
+import MCBans, { MCBansPlayer, MCBansRecentBan, MCBansServer } from './mcbans'
 import { AppDataSource } from './mysql'
 
 async function getAllRecentBans(mcbans: MCBans): Promise<MCBansRecentBan[]> {
@@ -24,7 +24,12 @@ const banQueue = new BanQueue()
 async function getPlayer(
   mcbans: MCBans,
   playerId: number
-): Promise<{ row: DBPlayer; created: boolean; updated: boolean }> {
+): Promise<{
+  row: DBPlayer
+  player: MCBansPlayer | null
+  created: boolean
+  updated: boolean
+}> {
   const dbPlayer = await DBPlayer.findOne({
     where: {
       playerId,
@@ -32,7 +37,7 @@ async function getPlayer(
   })
   if (!dbPlayer) {
     // Create new player
-    const player = await mcbans.getPlayer(playerId, true)
+    const player = await mcbans.getPlayer(playerId)
     if (player === null) {
       throw new Error(`Player not found: ${playerId}`)
     }
@@ -44,6 +49,7 @@ async function getPlayer(
         reputation: player.reputation,
         lastCheckedAt: new Date(),
       }).save(),
+      player,
       created: true,
       updated: false,
     }
@@ -62,12 +68,14 @@ async function getPlayer(
     dbPlayer.lastCheckedAt = new Date()
     return {
       row: await dbPlayer.save(),
+      player,
       created: false,
       updated: true,
     }
   }
   return {
     row: dbPlayer,
+    player: null,
     created: false,
     updated: false,
   }
@@ -76,7 +84,12 @@ async function getPlayer(
 async function getServer(
   mcbans: MCBans,
   serverId: number
-): Promise<{ row: DBServer; created: boolean; updated: boolean }> {
+): Promise<{
+  row: DBServer
+  server: MCBansServer | null
+  created: boolean
+  updated: boolean
+}> {
   const dbServer = await DBServer.findOne({
     where: {
       serverId,
@@ -84,7 +97,7 @@ async function getServer(
   })
   if (!dbServer) {
     // Create new server
-    const server = await mcbans.getServer(serverId, true)
+    const server = await mcbans.getServer(serverId)
     if (server === null) {
       throw new Error(`Server not found: ${serverId}`)
     }
@@ -98,6 +111,7 @@ async function getServer(
         registeredAt: server.registeredAt,
         lastCheckedAt: new Date(),
       }).save(),
+      server,
       created: true,
       updated: false,
     }
@@ -118,12 +132,14 @@ async function getServer(
     dbServer.lastCheckedAt = new Date()
     return {
       row: await dbServer.save(),
+      server,
       created: false,
       updated: true,
     }
   }
   return {
     row: dbServer,
+    server: null,
     created: false,
     updated: false,
   }
@@ -213,6 +229,7 @@ async function queueProcessor(mcbans: MCBans) {
       // 処罰実施者情報を取得
       const {
         row: dbBannedByPlayer,
+        player: mcbansPlayer,
         created: isBannedByCreated,
         updated: isBannedByUpdated,
       } = await getPlayer(mcbans, ban.bannedBy.id)
@@ -225,7 +242,7 @@ async function queueProcessor(mcbans: MCBans) {
           Date.now() - 24 * 60 * 60 * 1000
       ) {
         console.log("Get banned-by player's ban history from MCBans.")
-        const player = await mcbans.getPlayer(ban.bannedBy.id)
+        const player = mcbansPlayer ?? (await mcbans.getPlayer(ban.bannedBy.id))
         if (player === null) {
           throw new Error(`Player not found: ${ban.bannedBy.id}`)
         }
@@ -240,6 +257,7 @@ async function queueProcessor(mcbans: MCBans) {
       // 処罰サーバ情報を取得
       const {
         row: dbServer,
+        server: mcbansServer,
         created: isServerCreated,
         updated: isServerUpdated,
       } = await getServer(mcbans, ban.server.id)
@@ -251,7 +269,7 @@ async function queueProcessor(mcbans: MCBans) {
         dbServer.lastCheckedAt.getTime() < Date.now() - 24 * 60 * 60 * 1000
       ) {
         console.log("Get server's ban history from MCBans.")
-        const server = await mcbans.getServer(ban.server.id)
+        const server = mcbansServer ?? (await mcbans.getServer(ban.server.id))
         if (server === null) {
           throw new Error(`Server not found: ${ban.server.id}`)
         }
