@@ -44,7 +44,13 @@ export default class BanQueue {
     if (!fs.existsSync('/data/bans-queue.json')) {
       return
     }
-    this.queue = JSON.parse(fs.readFileSync('/data/bans-queue.json', 'utf8'))
-    console.log(`Loaded ${this.queue.length} bans from queue.`)
+    try {
+      this.queue = JSON.parse(fs.readFileSync('/data/bans-queue.json', 'utf8'))
+      console.log(`Loaded ${this.queue.length} bans from queue.`)
+    } catch (e) {
+      console.error('Broken bans-queue.json file. Resetting.', e)
+      this.queue = []
+      this.save()
+    }
   }
 }
