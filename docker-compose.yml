@@ -46,7 +46,7 @@ services:
       test:
         [
           "CMD",
-          "mysqladmin",
+          "mariadb-admin",
           "ping",
           "-h",
           "localhost",
